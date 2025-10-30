@@ -9,7 +9,6 @@ function Signup() {
   const [loading, setLoading] = useState(false);
 
   const { session, signUpUser } = useAuth();
-  // console.log(session);
 
   const navigate = useNavigate();
 

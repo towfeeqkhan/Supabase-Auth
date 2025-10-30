@@ -4,6 +4,7 @@ import { supabase } from "../supabaseClient";
 
 export const AuthProvider = ({ children }) => {
   const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   // Sign up
   const signUpUser = async (email, password) => {
@@ -22,9 +23,31 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Sign in
+  const signInUser = async (email, password) => {
+    const lowerCaseEmail = email.toLowerCase();
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: lowerCaseEmail,
+        password: password,
+      });
+      if (error) {
+        console.log("Sign in error", error.message);
+        return { success: false, error: error.message };
+      } else {
+        console.log("Sign in success");
+        return { success: true, data };
+      }
+    } catch (error) {
+      console.log("an error occurred", error.message);
+    }
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
+      setLoading(false);
     });
 
     supabase.auth.onAuthStateChange((_event, session) => {
@@ -45,7 +68,9 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ session, signUpUser, signOutUser }}>
+    <AuthContext.Provider
+      value={{ session, signUpUser, signInUser, signOutUser, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );
